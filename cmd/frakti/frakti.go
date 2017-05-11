@@ -89,6 +89,7 @@ func main() {
 		*cniNetDir,
 		*cniPluginDir,
 		*cgroupDriver,
+		filepath.Join(*rootDir, "alternative"),
 	)
 	if err != nil && *enableAlternativeRuntime {
 		glog.Errorf("Initialize alternative runtime failed: %v", err)

@@ -30,7 +30,7 @@ import (
 	kubecontainer "k8s.io/kubernetes/pkg/kubelet/container"
 	"k8s.io/kubernetes/pkg/kubelet/dockershim"
 
-	"k8s.io/kubernetes/pkg/kubelet/dockertools"
+	"k8s.io/kubernetes/pkg/kubelet/dockershim/libdocker"
 	"k8s.io/kubernetes/pkg/kubelet/server/streaming"
 )
 
@@ -47,13 +47,13 @@ func (a *AternativeRuntime) ServiceName() string {
 	return "alternative runtime service"
 }
 
-func NewAlternativeRuntimeService(alternativeRuntimeEndpoint string, streamingConfig *streaming.Config, cniNetDir, cniPluginDir, cgroupDriver string) (*AternativeRuntime, error) {
+func NewAlternativeRuntimeService(alternativeRuntimeEndpoint string, streamingConfig *streaming.Config, cniNetDir, cniPluginDir, cgroupDriver, alternativeRuntimeRootDir string) (*AternativeRuntime, error) {
 	// For now we use docker as the only supported alternative runtime
 	glog.Infof("Initialize alternative runtime: docker runtime\n")
 
 	kubeCfg := &componentconfigv1alpha1.KubeletConfiguration{}
 	componentconfigv1alpha1.SetDefaults_KubeletConfiguration(kubeCfg)
-	dockerClient := dockertools.ConnectToDockerOrDie(
+	dockerClient := libdocker.ConnectToDockerOrDie(
 		// alternativeRuntimeEndpoint defaults to kubeCfg.DockerEndpoint
 		alternativeRuntimeEndpoint,
 		kubeCfg.RuntimeRequestTimeout.Duration,
@@ -88,7 +88,9 @@ func NewAlternativeRuntimeService(alternativeRuntimeEndpoint string, streamingCo
 		&pluginSettings,
 		kubeCfg.RuntimeCgroups,
 		cgroupDriver,
-		&dockertools.NativeExecHandler{},
+		kubeCfg.DockerExecHandlerName,
+		alternativeRuntimeRootDir,
+		*kubeCfg.DockerDisableSharedPID,
 	)
 	if err != nil {
 		return nil, err

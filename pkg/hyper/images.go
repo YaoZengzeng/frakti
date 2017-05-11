@@ -109,3 +109,8 @@ func (h *Runtime) ImageStatus(image *kubeapi.ImageSpec) (*kubeapi.Image, error) 
 		Size_:       imageSize,
 	}, nil
 }
+
+// ImageFsInfo returns information of the filesystem that is used to store images.
+func (h *Runtime) ImageFsInfo() (*kubeapi.FsInfo, error) {
+	return nil, fmt.Error("not implemented")
+}
